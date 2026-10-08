@@ -3,15 +3,10 @@
 [![testes](https://github.com/BrunoMaia23/monitor-urls-quebradas/actions/workflows/testes.yml/badge.svg)](https://github.com/BrunoMaia23/monitor-urls-quebradas/actions/workflows/testes.yml)
 
 Depois que um site muda de estrutura, as URLs antigas continuam recebendo visita: estão em favoritos,
-em links de outros sites e nos resultados de busca. Este monitor pega as páginas antigas que ainda têm
-tráfego, testa cada uma, ordena as quebradas pelo número de acessos e sugere para onde cada uma deveria
-redirecionar. Foi um projeto do time em que eu trabalhei, depois de uma migração do site; este
-repositório refaz a ideia do zero, com um site de mentira num servidor local e exportações fictícias.
-
-*In English: a post-migration broken-URL monitor. Reads old URLs and their traffic from analytics
-exports, follows each redirect hop by hop (chains, loops, redirects to dead pages), ranks broken pages by
-traffic, and suggests 301 targets from the current sitemap, with a confidence level and an nginx map for
-the confident ones. Synthetic data, local fake site.*
+em links de outros sites e nos resultados de busca. Depois de uma migração de site no trabalho, o time
+montou um monitor para isso, alimentado pelas APIs do Google Analytics e do Search Console e rodando no
+Airflow; eu trabalhei nele. A versão daqui roda contra um site de mentira num servidor local, com
+exportações inventadas.
 
 ## O que ele faz
 
@@ -30,7 +25,7 @@ the confident ones. Synthetic data, local fake site.*
    sugestões confiantes (para alguém revisar e aplicar) e uma linha por execução num histórico, para
    acompanhar a curva de quebradas caindo.
 
-## A demo
+## Contra o site de mentira
 
 ```bash
 python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
@@ -59,17 +54,5 @@ python -m monitor demo
 [saída]       urls_validadas.csv, redirects_sugeridos.csv, redirects_nginx.conf (4 redirects, 2 para revisar) e uma linha a mais em historico.csv
 ```
 
-Contra um site de verdade: `python -m monitor verificar --base https://www.example.org --sitemap
+Num site de verdade: `python -m monitor verificar --base https://www.example.org --sitemap
 https://www.example.org/sitemap.xml exportacao_1.csv exportacao_2.csv`.
-
-## No projeto real
-
-As páginas antigas vêm direto das APIs do Google Analytics e do Search Console, além de exportações
-manuais, e o processo roda no Airflow depois da migração do site, gravando o histórico a cada execução.
-
-## Testes
-
-`pytest` sobe o site de mentira e cobre a leitura das exportações com cabeçalhos diferentes, cada
-situação de URL (ok, redirect, cadeia, quebrada direta e por redirect, erro 500, loop, servidor fora do
-ar), sitemap simples e índice, a nota de semelhança, a sugestão com o mapa do nginx e o histórico
-crescendo uma linha por execução.
